@@ -1,7 +1,26 @@
-
 local M = {}
-
 function M.parse_file()
+  local start_pos = vim.api.nvim_buf_get_mark(0, 'c')
+  local end_pos = vim.api.nvim_buf_get_mark(0, 'd')
+  -- lines 现在包含了从标记 a 到标记 b 之间的行
+  local lines = vim.api.nvim_buf_get_lines(0, start_pos[1] - 1, end_pos[1], false)
+  local definitions = {}
+
+  -- 打印获取的行内容
+  print("Lines between 'c' and 'd':")
+  for _, line in ipairs(lines) do
+    print(line)
+  end
+  for _, line in ipairs(lines) do
+    local var, expr = line:match("^%s*(%%[%w_]+)%s*=%s*(.+)$")
+    if var and expr then
+      definitions[var] = expr
+    end
+  end
+  return definitions
+end
+
+function M.parse_file_all()
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
   local definitions = {}
   for _, line in ipairs(lines) do

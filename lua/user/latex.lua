@@ -65,7 +65,7 @@ vim.g.UltiSnipsSnippetDirectories = { "~/.config/lvim/snippets" }
 vim.g.tex_conceal = 'abdmg'
 vim.opt.conceallevel = 1
 vim.opt.background = 'dark'
-lvim.colorscheme = "wal"
+-- lvim.colorscheme = "wal"
 vim.opt.termguicolors = true
 vim.cmd [[highlight Conceal ctermbg=none guibg=none]]
 vim.g.vimtex_quickfix_mode = 0

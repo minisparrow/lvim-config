@@ -20,7 +20,8 @@ local plugins = {
     'junegunn/fzf',
     'junegunn/fzf.vim',
     'gyim/vim-boxdraw',
-    "simrat39/symbols-outline.nvim",
+    'neovim/nvim-lspconfig',
+    -- 'simrat39/symbols-outline.nvim',
     'vim-airline/vim-airline',
     'vim-airline/vim-airline-themes',
     'godlygeek/tabular',
@@ -105,9 +106,9 @@ lvim.builtin.which_key.mappings["df"] = {
 lvim.builtin.which_key.mappings["dF"] = {
   "<cmd>lua require('neotest').run.run({vim.fn.expand('%'), strategy = 'dap'})<cr>", "Test Class DAP" }
 lvim.builtin.which_key.mappings["dS"] = { "<cmd>lua require('neotest').summary.toggle()<cr>", "Test Summary" }
--- 添加清除所有断点的快捷键
-vim.api.nvim_set_keymap('n', '<leader>dc', ':lua require("dap").clear_breakpoints()<CR>',
-  { noremap = true, silent = true })
+-- 添加清除所有断点的快捷键, conflict with dap debug continue
+-- vim.api.nvim_set_keymap('n', '<leader>dc', ':lua require("dap").clear_breakpoints()<CR>',
+--   { noremap = true, silent = true })
 
 -- vim options
 vim.opt.shiftwidth = 2
@@ -115,70 +116,70 @@ vim.opt.tabstop = 2
 vim.opt.relativenumber = false
 vim.opt.clipboard = "unnamedplus"
 vim.opt.number = true
-require("symbols-outline").setup()
-local opts = {
-  highlight_hovered_item = true,
-  show_guides = true,
-  auto_preview = false,
-  position = 'right',
-  relative_width = true,
-  width = 25,
-  auto_close = false,
-  show_numbers = false,
-  show_relative_numbers = false,
-  show_symbol_details = true,
-  preview_bg_highlight = 'Pmenu',
-  autofold_depth = nil,
-  auto_unfold_hover = true,
-  fold_markers = { '', '' },
-  wrap = false,
-  keymaps = { -- These keymaps can be a string or a table for multiple keys
-    close = { "<Esc>", "q" },
-    goto_location = "<Cr>",
-    focus_location = "o",
-    hover_symbol = "<C-space>",
-    toggle_preview = "K",
-    rename_symbol = "r",
-    code_actions = "a",
-    fold = "h",
-    unfold = "l",
-    fold_all = "W",
-    unfold_all = "E",
-    fold_reset = "R",
-  },
-  lsp_blacklist = {},
-  symbol_blacklist = {},
-  symbols = {
-    File = { icon = "", hl = "@text.uri" },
-    Module = { icon = "", hl = "@namespace" },
-    Namespace = { icon = "", hl = "@namespace" },
-    Package = { icon = "", hl = "@namespace" },
-    Class = { icon = "𝓒", hl = "@type" },
-    Method = { icon = "ƒ", hl = "@method" },
-    Property = { icon = "", hl = "@method" },
-    Field = { icon = "", hl = "@field" },
-    Constructor = { icon = "", hl = "@constructor" },
-    Enum = { icon = "ℰ", hl = "@type" },
-    Interface = { icon = "ﰮ", hl = "@type" },
-    Function = { icon = "", hl = "@function" },
-    Variable = { icon = "", hl = "@constant" },
-    Constant = { icon = "", hl = "@constant" },
-    String = { icon = "𝓐", hl = "@string" },
-    Number = { icon = "#", hl = "@number" },
-    Boolean = { icon = "⊨", hl = "@boolean" },
-    Array = { icon = "", hl = "@constant" },
-    Object = { icon = "⦿", hl = "@type" },
-    Key = { icon = "🔐", hl = "@type" },
-    Null = { icon = "NULL", hl = "@type" },
-    EnumMember = { icon = "", hl = "@field" },
-    Struct = { icon = "𝓢", hl = "@type" },
-    Event = { icon = "🗲", hl = "@type" },
-    Operator = { icon = "+", hl = "@operator" },
-    TypeParameter = { icon = "𝙏", hl = "@parameter" },
-    Component = { icon = "", hl = "@function" },
-    Fragment = { icon = "", hl = "@constant" },
-  },
-}
+-- require("symbols-outline").setup()
+-- local opts = {
+--   highlight_hovered_item = true,
+--   show_guides = true,
+--   auto_preview = false,
+--   position = 'right',
+--   relative_width = true,
+--   width = 25,
+--   auto_close = false,
+--   show_numbers = false,
+--   show_relative_numbers = false,
+--   -- show_symbol_details = true,
+--   preview_bg_highlight = 'Pmenu',
+--   autofold_depth = nil,
+--   auto_unfold_hover = true,
+--   fold_markers = { '', '' },
+--   wrap = false,
+--   keymaps = { -- These keymaps can be a string or a table for multiple keys
+--     close = { "<Esc>", "q" },
+--     goto_location = "<Cr>",
+--     focus_location = "o",
+--     hover_symbol = "<C-space>",
+--     toggle_preview = "K",
+--     rename_symbol = "r",
+--     code_actions = "a",
+--     fold = "h",
+--     unfold = "l",
+--     fold_all = "W",
+--     unfold_all = "E",
+--     fold_reset = "R",
+--   },
+--   lsp_blacklist = {},
+--   symbol_blacklist = {},
+--   symbols = {
+--     File = { icon = "", hl = "@text.uri" },
+--     Module = { icon = "", hl = "@namespace" },
+--     Namespace = { icon = "", hl = "@namespace" },
+--     Package = { icon = "", hl = "@namespace" },
+--     Class = { icon = "𝓒", hl = "@type" },
+--     Method = { icon = "ƒ", hl = "@method" },
+--     Property = { icon = "", hl = "@method" },
+--     Field = { icon = "", hl = "@field" },
+--     Constructor = { icon = "", hl = "@constructor" },
+--     Enum = { icon = "ℰ", hl = "@type" },
+--     Interface = { icon = "ﰮ", hl = "@type" },
+--     Function = { icon = "", hl = "@function" },
+--     Variable = { icon = "", hl = "@constant" },
+--     Constant = { icon = "", hl = "@constant" },
+--     String = { icon = "𝓐", hl = "@string" },
+--     Number = { icon = "#", hl = "@number" },
+--     Boolean = { icon = "⊨", hl = "@boolean" },
+--     Array = { icon = "", hl = "@constant" },
+--     Object = { icon = "⦿", hl = "@type" },
+--     Key = { icon = "🔐", hl = "@type" },
+--     Null = { icon = "NULL", hl = "@type" },
+--     EnumMember = { icon = "", hl = "@field" },
+--     Struct = { icon = "𝓢", hl = "@type" },
+--     Event = { icon = "🗲", hl = "@type" },
+--     Operator = { icon = "+", hl = "@operator" },
+--     TypeParameter = { icon = "𝙏", hl = "@parameter" },
+--     Component = { icon = "", hl = "@function" },
+--     Fragment = { icon = "", hl = "@constant" },
+--   },
+-- }
 
 
 --- func:  python code completion
@@ -245,6 +246,7 @@ require("user.lualine")
 require("user.code-formatter")
 require("user.debug-cpp")
 require("user.debug-py")
+require("user.debug-window")
 require("user.latex")
 
 lvim.builtin.treesitter.ensure_installed = {
@@ -259,3 +261,76 @@ lvim.builtin.treesitter.ensure_installed = {
 }
 vim.opt_local.makeprg = "clang"
 vim.api.nvim_set_keymap('n', '<Space>ne', ':NERDTreeToggle<CR>', { noremap = true, silent = true })
+
+dapui = require('dapui')
+dapui.setup({
+  layouts = {
+    --1. scope, breakpoints, stacks, watches
+    {
+      elements = { {
+        id = "scopes",
+        size = 0.25
+      }, {
+        id = "breakpoints",
+        size = 0.25
+      }, {
+        id = "stacks",
+        size = 0.25
+      }, {
+        id = "watches",
+        size = 0.25
+      } },
+      position = "right",
+      size = 60
+    },
+    --2. repl, console
+    {
+      elements = { {
+        id = "repl",
+        size = 0.5
+      }, {
+        id = "console",
+        size = 0.5
+      } },
+      position = "bottom",
+      size = 10
+    },
+    --3. stacks
+    {
+      elements = {
+        {
+          id = "stacks",
+          size = 1
+        }
+      },
+      position = "right",
+      size = 60
+    },
+    --4. repl
+    {
+      elements = {
+        {
+          id = "repl",
+          size = 1
+        }
+      },
+      position = "bottom",
+      size = 10
+    },
+    --5. watches
+    {
+      elements = {
+        {
+          id = "watches",
+          size = 1
+        }
+      },
+      position = "right",
+      size = 60
+    },
+  },
+})
+
+vim.o.foldmethod = 'indent'
+vim.o.foldlevel = 99    -- 默认展开所有折叠
+vim.o.foldenable = true -- 启用代码折叠
