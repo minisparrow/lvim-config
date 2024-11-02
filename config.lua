@@ -12,6 +12,7 @@ local plugins = {
     "lervag/vimtex", --latex 主要是这个， 其他两个可以不用
     "xuhdev/vim-latex-live-preview",
     "jbyuki/nabla.nvim",
+    "liuchengxu/graphviz.vim",
     -- 插件部分
     "preservim/nerdtree",
     'kshenoy/vim-signature',
@@ -236,19 +237,6 @@ lvim.keys.normal_mode["<C-n>"] = ":bnext<cr>"
 lvim.keys.normal_mode["<C-l>"] = ":echo expand('%:p')<cr>"
 lvim.keys.normal_mode["<C-t>"] = ":SymbolsOutline<cr>"
 
-require("user.searchword")
-require("user.jump")
-require("user.countlines")
-require("user.depends-tree")
-require("user.file-tree")
-require("user.clangd-lsp")
-require("user.lualine")
-require("user.code-formatter")
-require("user.debug-cpp")
-require("user.debug-py")
-require("user.debug-window")
-require("user.latex")
-
 lvim.builtin.treesitter.ensure_installed = {
   "python",
   "cpp",
@@ -334,3 +322,20 @@ dapui.setup({
 vim.o.foldmethod = 'indent'
 vim.o.foldlevel = 99    -- 默认展开所有折叠
 vim.o.foldenable = true -- 启用代码折叠
+
+require("user.searchword")
+require("user.jump")
+require("user.countlines")
+require("user.depends-tree")
+require("user.file-tree")
+require("user.clangd-lsp")
+require("user.lualine")
+require("user.code-formatter")
+require("user.debug-cpp")
+require("user.debug-py")
+require("user.debug-window")
+require("user.latex")
+require("user.buffer-tab-select")
+require("user.inkscape_figure")
+vim.api.nvim_set_keymap('n', '<leader>gvc', ':GraphvizCompile<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>gv', ':Graphviz<CR>', { noremap = true, silent = true })
