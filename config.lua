@@ -14,6 +14,34 @@ local plugins = {
     "jbyuki/nabla.nvim",
     "liuchengxu/graphviz.vim",
     -- 插件部分
+    -- markdown
+    {
+      "toppair/peek.nvim",
+      event = { "VeryLazy" },
+      build = "deno task --quiet build:fast",
+      -- deno install
+      -- curl -fsSL https://deno.land/install.sh | sh
+      config = function()
+        require('peek').setup({
+          auto_load = true,          -- 打开 Markdown 文件时自动加载预览
+          close_on_bdelete = true,   -- 关闭缓冲区时自动关闭预览
+          app = 'browser',           -- 使用系统默认浏览器
+          theme = 'light',           -- 主题设置：'light' 或 'dark'
+          filetype = { 'markdown' }, -- 启用预览的文件类型
+        })
+
+        vim.api.nvim_create_user_command("PeekOpen", require("peek").open, {})
+        vim.api.nvim_create_user_command("PeekClose", require("peek").close, {})
+      end,
+    },
+    -- install without yarn or npm
+    {
+      "iamcco/markdown-preview.nvim",
+      cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+      ft = { "markdown" },
+      build = function() vim.fn["mkdp#util#install"]() end,
+    },
+
     "preservim/nerdtree",
     'kshenoy/vim-signature',
     'inkarkat/vim-mark',
