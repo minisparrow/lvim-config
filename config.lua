@@ -13,6 +13,36 @@ local plugins = {
     "xuhdev/vim-latex-live-preview",
     "jbyuki/nabla.nvim",
     "liuchengxu/graphviz.vim",
+    -- auto scroll
+    {
+      "karb94/neoscroll.nvim",
+      config = function()
+        require("neoscroll").setup({
+          easing_function = nil, -- 缓动效果（可选）
+        })
+      end,
+    },
+    'godlygeek/tabular',
+    {
+      "preservim/vim-markdown",
+      config = function()
+        vim.g.vim_markdown_toc_autofit = 1
+      end,
+
+    },
+    {
+      "mzlogin/vim-markdown-toc",
+      config = function()
+        vim.g.vmt_auto_update_on_save = 1 -- 自动更新目录
+        vim.g.vmt_dont_insert_fence = 1   -- 不插入围栏
+      end,
+    },
+    -- {
+
+    --   "ajorgensen/vim-markdown-toc",
+    --     vim.g.mdtoc_starting_header_level = 1
+    -- },
+
     -- 插件部分
     -- markdown
     {
@@ -41,7 +71,6 @@ local plugins = {
       ft = { "markdown" },
       build = function() vim.fn["mkdp#util#install"]() end,
     },
-
     "preservim/nerdtree",
     'kshenoy/vim-signature',
     'inkarkat/vim-mark',
@@ -50,7 +79,7 @@ local plugins = {
     'junegunn/fzf.vim',
     'gyim/vim-boxdraw',
     'neovim/nvim-lspconfig',
-    -- 'simrat39/symbols-outline.nvim',
+    'simrat39/symbols-outline.nvim',
     'vim-airline/vim-airline',
     'vim-airline/vim-airline-themes',
     'godlygeek/tabular',
@@ -116,7 +145,8 @@ lvim.leader = "space"
 -- add your own keymapping
 lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 -- -- Change theme settings
-lvim.colorscheme = "habamax"
+-- lvim.colorscheme = "habamax"
+lvim.colorscheme = "tokyonight"
 
 lvim.builtin.alpha.active = true
 lvim.builtin.alpha.mode = "dashboard"
@@ -143,72 +173,105 @@ lvim.builtin.which_key.mappings["dS"] = { "<cmd>lua require('neotest').summary.t
 vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
 vim.opt.relativenumber = false
+
+-- lifunc clipboard
+-- 设置xclip复制到vim.g.clipboard
+-- vim.opt.clipboard = "unnamedplus"
+-- vim.opt.number = true
+-- vim.g.clipboard = {
+--   name = 'xclip',
+--   copy = {
+--     ['+'] = 'xclip -selection clipboard',
+--     ['*'] = 'xclip -selection primary',
+--   },
+--   paste = {
+--     ['+'] = 'xclip -selection clipboard -o',
+--     ['*'] = 'xclip -selection primary -o',
+--   },
+--   cache_enabled = true,
+-- }
+
 vim.opt.clipboard = "unnamedplus"
 vim.opt.number = true
--- require("symbols-outline").setup()
--- local opts = {
---   highlight_hovered_item = true,
---   show_guides = true,
---   auto_preview = false,
---   position = 'right',
---   relative_width = true,
---   width = 25,
---   auto_close = false,
---   show_numbers = false,
---   show_relative_numbers = false,
---   -- show_symbol_details = true,
---   preview_bg_highlight = 'Pmenu',
---   autofold_depth = nil,
---   auto_unfold_hover = true,
---   fold_markers = { '', '' },
---   wrap = false,
---   keymaps = { -- These keymaps can be a string or a table for multiple keys
---     close = { "<Esc>", "q" },
---     goto_location = "<Cr>",
---     focus_location = "o",
---     hover_symbol = "<C-space>",
---     toggle_preview = "K",
---     rename_symbol = "r",
---     code_actions = "a",
---     fold = "h",
---     unfold = "l",
---     fold_all = "W",
---     unfold_all = "E",
---     fold_reset = "R",
---   },
---   lsp_blacklist = {},
---   symbol_blacklist = {},
---   symbols = {
---     File = { icon = "", hl = "@text.uri" },
---     Module = { icon = "", hl = "@namespace" },
---     Namespace = { icon = "", hl = "@namespace" },
---     Package = { icon = "", hl = "@namespace" },
---     Class = { icon = "𝓒", hl = "@type" },
---     Method = { icon = "ƒ", hl = "@method" },
---     Property = { icon = "", hl = "@method" },
---     Field = { icon = "", hl = "@field" },
---     Constructor = { icon = "", hl = "@constructor" },
---     Enum = { icon = "ℰ", hl = "@type" },
---     Interface = { icon = "ﰮ", hl = "@type" },
---     Function = { icon = "", hl = "@function" },
---     Variable = { icon = "", hl = "@constant" },
---     Constant = { icon = "", hl = "@constant" },
---     String = { icon = "𝓐", hl = "@string" },
---     Number = { icon = "#", hl = "@number" },
---     Boolean = { icon = "⊨", hl = "@boolean" },
---     Array = { icon = "", hl = "@constant" },
---     Object = { icon = "⦿", hl = "@type" },
---     Key = { icon = "🔐", hl = "@type" },
---     Null = { icon = "NULL", hl = "@type" },
---     EnumMember = { icon = "", hl = "@field" },
---     Struct = { icon = "𝓢", hl = "@type" },
---     Event = { icon = "🗲", hl = "@type" },
---     Operator = { icon = "+", hl = "@operator" },
---     TypeParameter = { icon = "𝙏", hl = "@parameter" },
---     Component = { icon = "", hl = "@function" },
---     Fragment = { icon = "", hl = "@constant" },
---   },
--- }
+vim.g.clipboard = {
+  name = 'pbcopy',
+  copy = {
+    ['+'] = 'pbcopy',
+    ['*'] = 'pbcopy',
+  },
+  paste = {
+    ['+'] = 'pbpaste',
+    ['*'] = 'pbpaste',
+  },
+  cache_enabled = true,
+}
+
+
+vim.opt.number = true
+require("symbols-outline").setup()
+local opts = {
+  highlight_hovered_item = true,
+  show_guides = true,
+  auto_preview = false,
+  position = 'right',
+  relative_width = true,
+  width = 25,
+  auto_close = false,
+  show_numbers = false,
+  show_relative_numbers = false,
+  -- show_symbol_details = true,
+  preview_bg_highlight = 'Pmenu',
+  autofold_depth = nil,
+  auto_unfold_hover = true,
+  fold_markers = { '', '' },
+  wrap = false,
+  keymaps = { -- These keymaps can be a string or a table for multiple keys
+    close = { "<Esc>", "q" },
+    goto_location = "<Cr>",
+    focus_location = "o",
+    hover_symbol = "<C-space>",
+    toggle_preview = "K",
+    rename_symbol = "r",
+    code_actions = "a",
+    fold = "h",
+    unfold = "l",
+    fold_all = "W",
+    unfold_all = "E",
+    fold_reset = "R",
+  },
+  lsp_blacklist = {},
+  symbol_blacklist = {},
+  symbols = {
+    File = { icon = "", hl = "@text.uri" },
+    Module = { icon = "", hl = "@namespace" },
+    Namespace = { icon = "", hl = "@namespace" },
+    Package = { icon = "", hl = "@namespace" },
+    Class = { icon = "𝓒", hl = "@type" },
+    Method = { icon = "ƒ", hl = "@method" },
+    Property = { icon = "", hl = "@method" },
+    Field = { icon = "", hl = "@field" },
+    Constructor = { icon = "", hl = "@constructor" },
+    Enum = { icon = "ℰ", hl = "@type" },
+    Interface = { icon = "ﰮ", hl = "@type" },
+    Function = { icon = "", hl = "@function" },
+    Variable = { icon = "", hl = "@constant" },
+    Constant = { icon = "", hl = "@constant" },
+    String = { icon = "𝓐", hl = "@string" },
+    Number = { icon = "#", hl = "@number" },
+    Boolean = { icon = "⊨", hl = "@boolean" },
+    Array = { icon = "", hl = "@constant" },
+    Object = { icon = "⦿", hl = "@type" },
+    Key = { icon = "🔐", hl = "@type" },
+    Null = { icon = "NULL", hl = "@type" },
+    EnumMember = { icon = "", hl = "@field" },
+    Struct = { icon = "𝓢", hl = "@type" },
+    Event = { icon = "🗲", hl = "@type" },
+    Operator = { icon = "+", hl = "@operator" },
+    TypeParameter = { icon = "𝙏", hl = "@parameter" },
+    Component = { icon = "", hl = "@function" },
+    Fragment = { icon = "", hl = "@constant" },
+  },
+}
 
 
 --- func:  python code completion
@@ -274,6 +337,7 @@ lvim.builtin.treesitter.ensure_installed = {
   "vim",
   "vimdoc",
   "query",
+  "markdown",
 }
 vim.opt_local.makeprg = "clang"
 vim.api.nvim_set_keymap('n', '<Space>ne', ':NERDTreeToggle<CR>', { noremap = true, silent = true })
@@ -365,5 +429,86 @@ require("user.debug-window")
 require("user.latex")
 require("user.buffer-tab-select")
 require("user.inkscape_figure")
+neoscroll = require('neoscroll')
+
+function type_file(interval)
+  interval = interval or 50 -- 每个字符的间隔时间（毫秒）
+
+  -- 获取当前缓冲区的所有内容
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local content = table.concat(lines, "\n") -- 将所有行拼接为完整字符串
+
+  -- 清空缓冲区
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, { "" })
+
+  local total_length = #content
+  local current_pos = 0
+  local timer = vim.loop.new_timer()
+
+  -- 使用计时器逐字符插入
+  timer:start(0, interval, vim.schedule_wrap(function()
+    if current_pos < total_length then
+      current_pos = current_pos + 1
+      local partial_content = content:sub(1, current_pos)          -- 截取当前内容
+      local display_lines = vim.split(partial_content, "\n", true) -- 按换行分割
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, display_lines)   -- 更新缓冲区
+
+      -- 移动光标到最后一行
+      local last_line = #display_lines
+      vim.api.nvim_win_set_cursor(0, { last_line, #display_lines[last_line] or 0 })
+
+      -- 滚动屏幕：确保光标在屏幕可见范围
+      vim.cmd("normal! zz")
+    else
+      timer:stop() -- 停止计时器
+      timer:close()
+    end
+  end))
+end
+
+function type_file2(interval)
+  interval = interval or 50 -- 每个字符的间隔时间（毫秒）
+
+  -- 获取当前缓冲区的所有内容
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local content = table.concat(lines, "\n") -- 将所有行拼接为完整字符串
+
+  -- 清空缓冲区
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, { "" })
+
+  local total_length = #content
+  local current_pos = 0
+  local timer = vim.loop.new_timer()
+
+  -- 使用计时器逐字符插入
+  timer:start(0, interval, vim.schedule_wrap(function()
+    if current_pos < total_length then
+      current_pos = current_pos + 1
+      local partial_content = content:sub(1, current_pos)          -- 截取当前内容
+      local display_lines = vim.split(partial_content, "\n", true) -- 按换行分割
+      vim.api.nvim_buf_set_lines(0, 0, -1, false, display_lines)   -- 更新缓冲区
+    else
+      timer:stop()                                                 -- 停止计时器
+      timer:close()
+    end
+  end))
+end
+
+-- 绑定按键
+lvim.keys.normal_mode["<leader>tp"] = function()
+  type_file(100) -- 设置速度为每字符 100ms
+end
+
+
 vim.api.nvim_set_keymap('n', '<leader>gvc', ':GraphvizCompile<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>gv', ':Graphviz<CR>', { noremap = true, silent = true })
+-- autoscroll
+lvim.keys.normal_mode["<leader>rol"] = function() neoscroll.scroll(20, true, 200) end
+
+-- 引入自动滚动模块
+local autoscroll = require("user.autoscroll")
+
+-- 启动自动滚动
+lvim.keys.normal_mode["<C-f>"] = function() autoscroll.start(500) end -- 每 200 毫秒滚动 1 行
+-- 停止自动滚动
+lvim.keys.normal_mode["<C-b>"] = function() autoscroll.stop() end
