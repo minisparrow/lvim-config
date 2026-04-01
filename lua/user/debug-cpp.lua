@@ -82,6 +82,35 @@ dap.configurations.cpp = {
     stopOnEntry = true,
     terminal = 'integrated',
   },
+  {
+    name = "Launch with Python",
+    type = "codelldb",
+    request = "launch",
+    program = "python3",
+    args = function()
+      local script = vim.fn.input('Path to Python script: ', vim.fn.getcwd() .. '/', 'file')
+      return { script }
+    end,
+    cwd = '${workspaceFolder}',
+    stopOnEntry = false,
+    runInTerminal = true,
+  },
+  {
+    name = "Launch file with args",
+    type = "codelldb",
+    request = "launch",
+    program = function()
+      return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+    end,
+    args = function()
+      local input = vim.fn.input('Program arguments (space separated): ')
+      return vim.split(input, " ")
+    end,
+    cwd = '${workspaceFolder}',
+    stopOnEntry = true,
+    terminal = 'integrated',
+  }
+
 }
 
 -- dap.configurations.cpp = {

@@ -3,16 +3,72 @@
 -- Forum: https://www.reddit.com/r/lunarvim/
 -- Discord: https://discord.com/invite/Xb9B4Ny
 --
+--
+-- copilot
+--
+
+---
+---
 local plugins = {
   {
+    -- copilot
+    --
+    -- {
+    --     "zbirenbaum/copilot.lua",
+    --     cmd = "Copilot",
+    --     event = "InsertEnter",
+    --     config = function()
+    --         require("copilot").setup({})
+    --     end,
+    -- },
+    -- 
+    -- {
+    --     "zbirenbaum/copilot-cmp",
+    --     config = function()
+    --         require("copilot_cmp").setup({
+    --             suggestion = { enabled = false },
+    --             panel = { enabled = false }
+    --         })
+    --     end
+    -- },
+
+
+    -- Copilot Chat (Agent)
+    -- {
+    --   "CopilotC-Nvim/CopilotChat.nvim",
+    --   branch = "canary",
+    --   dependencies = {
+    --     { "zbirenbaum/copilot.lua" },
+    --     { "nvim-lua/plenary.nvim" },
+    --   },
+    --   config = function()
+    --     require("CopilotChat").setup()
+    --   end,
+    -- },
+
+    "ojroques/nvim-osc52", -- 更方便的做远程ssh复制粘贴到本地
+
     -- latex, ultisnips
     "dylanaraps/wal",
     "KeitaNakamura/tex-conceal.vim",
     "SirVer/ultisnips",
     "lervag/vimtex", --latex 主要是这个， 其他两个可以不用
-    "xuhdev/vim-latex-live-preview",
+    -- "xuhdev/vim-latex-live-preview",
     "jbyuki/nabla.nvim",
     "liuchengxu/graphviz.vim",
+
+
+
+    ---git operation: diffview
+    {
+       "sindrets/diffview.nvim",
+       dependencies = { "nvim-lua/plenary.nvim" },
+       cmd = { "DiffviewOpen", "DiffviewFileHistory" },
+
+    },
+    {
+      "lewis6991/gitsigns.nvim",
+    },
     -- auto scroll
     {
       "karb94/neoscroll.nvim",
@@ -95,7 +151,44 @@ local plugins = {
     "wbthomason/packer.nvim",
     "jose-elias-alvarez/null-ls.nvim",
     "nvim-lua/plenary.nvim",
-    "nvim-treesitter/nvim-treesitter"
+    "nvim-treesitter/nvim-treesitter",
+    -- Markdown slide presentation
+    {
+      -- dir = vim.fn.stdpath("config") .. "/local-plugins/presenting.nvim",
+      "minisparrow/presenting.nvim",
+      name = "presenting.nvim",
+      opts = {
+        options = {
+          width = 120,
+          toc_width = 40,
+        },
+        separator = {
+          markdown = "^---$",
+        },
+        keep_separator = false,
+      },
+      cmd = { "Presenting" },
+    },
+    {
+      "ducks/vimdeck.nvim",
+      cmd = { "Vimdeck" },
+    },
+    -- Treesitter configuration
+    require 'nvim-treesitter.configs'.setup {
+      highlight = {
+        enable = true, -- false will disable the whole extension
+      },
+      incremental_selection = {
+        enable = true,
+        keymaps = {
+          init_selection = "gnn",
+          node_incremental = "grn",
+          scope_incremental = "grc",
+          node_decremental = "grm",
+        },
+      },
+    }
+
     -- jupyter notebook
     -- 'luk400/vim-jukit',
     -- "GCBallesteros/jupytext.nvim"
@@ -113,6 +206,11 @@ local plugins = {
   --   },
 }
 
+-- 启用虚拟文本
+require("nvim-dap-virtual-text").setup {
+  commented = true, -- 在虚拟文本前加上注释风格，方便区分
+}
+
 local plugin_filetree = require('user.file-tree')
 vim.list_extend(plugins, plugin_filetree.plugins)
 local plugin_git = require("user.git")
@@ -123,7 +221,7 @@ for mode, mappings in pairs(plugin_git.keybindings) do
     lvim.keys[mode][key] = cmd
   end
 end
-lvim.builtin.gitsigns.active = false
+lvim.builtin.gitsigns.active = true 
 
 lvim.plugins = plugins
 
@@ -135,18 +233,18 @@ vim.opt.tabstop = 2
 lvim.log.level = "info"
 lvim.format_on_save = {
   enabled = true,
-  pattern = "*.lua",
+  pattern = "*.py, *.lua",
   timeout = 1000,
 }
 
-vim.g.python3_host_prog = "/opt/homebrew/bin/python3"
+vim.g.python3_host_prog = "python3"
 -- keymappings <https://www.lunarvim.org/docs/configuration/keybindings>
 lvim.leader = "space"
 -- add your own keymapping
 lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 -- -- Change theme settings
 -- lvim.colorscheme = "habamax"
-lvim.colorscheme = "tokyonight"
+lvim.colorscheme = "desert"
 
 lvim.builtin.alpha.active = true
 lvim.builtin.alpha.mode = "dashboard"
@@ -175,37 +273,40 @@ vim.opt.tabstop = 2
 vim.opt.relativenumber = false
 
 -- lifunc clipboard
--- 设置xclip复制到vim.g.clipboard
--- vim.opt.clipboard = "unnamedplus"
--- vim.opt.number = true
--- vim.g.clipboard = {
---   name = 'xclip',
---   copy = {
---     ['+'] = 'xclip -selection clipboard',
---     ['*'] = 'xclip -selection primary',
---   },
---   paste = {
---     ['+'] = 'xclip -selection clipboard -o',
---     ['*'] = 'xclip -selection primary -o',
---   },
---   cache_enabled = true,
--- }
-
 vim.opt.clipboard = "unnamedplus"
 vim.opt.number = true
-vim.g.clipboard = {
-  name = 'pbcopy',
-  copy = {
-    ['+'] = 'pbcopy',
-    ['*'] = 'pbcopy',
-  },
-  paste = {
-    ['+'] = 'pbpaste',
-    ['*'] = 'pbpaste',
-  },
-  cache_enabled = true,
-}
 
+if vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1 then
+  vim.g.clipboard = {
+    name = "pbcopy",
+    copy = {
+      ["+"] = "pbcopy",
+      ["*"] = "pbcopy",
+    },
+    paste = {
+      ["+"] = "pbpaste",
+      ["*"] = "pbpaste",
+    },
+    cache_enabled = true,
+  }
+elseif vim.fn.executable("xclip") == 1 then
+  vim.g.clipboard = {
+    name = "xclip",
+    copy = {
+      ["+"] = "xclip -selection clipboard",
+      ["*"] = "xclip -selection primary",
+    },
+    paste = {
+      ["+"] = "xclip -selection clipboard -o",
+      ["*"] = "xclip -selection primary -o",
+    },
+    cache_enabled = true,
+  }
+end
+
+-- Markdown slide presentation
+lvim.keys.normal_mode["<leader>ms"] = "<cmd>Presenting<CR>"
+lvim.keys.normal_mode["<leader>mv"] = "<cmd>Vimdeck<CR>"
 
 vim.opt.number = true
 require("symbols-outline").setup()
@@ -375,7 +476,18 @@ dapui.setup({
       position = "bottom",
       size = 10
     },
-    --3. stacks
+    --3. repl, console
+    {
+      elements = { 
+        {
+        id = "console",
+        size = 1 
+        } 
+      },
+      position = "bottom",
+      size = 10
+    },
+    --4. stacks
     {
       elements = {
         {
@@ -386,7 +498,7 @@ dapui.setup({
       position = "right",
       size = 60
     },
-    --4. repl
+    --5. repl
     {
       elements = {
         {
@@ -397,7 +509,7 @@ dapui.setup({
       position = "bottom",
       size = 10
     },
-    --5. watches
+    --6. watches
     {
       elements = {
         {
@@ -419,6 +531,7 @@ require("user.searchword")
 require("user.jump")
 require("user.countlines")
 require("user.depends-tree")
+-- require("user.ir-simplify").setup()  -- module not found, commented out
 require("user.file-tree")
 require("user.clangd-lsp")
 require("user.lualine")
@@ -444,3 +557,180 @@ local autoscroll = require("user.autoscroll")
 lvim.keys.normal_mode["<C-f>"] = function() autoscroll.start(500) end -- 每 200 毫秒滚动 1 行
 -- 停止自动滚动
 lvim.keys.normal_mode["<C-b>"] = function() autoscroll.stop() end
+
+
+-- evaluate current value when debug  2025.7.7
+dapui = require("dapui")
+function add_to_dap_watch()
+  local word = vim.fn.expand("<cword>")
+  dapui.eval()
+  dapui.elements.watches.add(word)
+end
+lvim.keys.normal_mode["<leader>dwa"] = ":lua add_to_dap_watch()<CR>"
+
+vim.keymap.set('v', '<leader>y', function()
+  require('osc52').copy_visual()
+end)
+
+-- 在文件末尾添加
+table.insert(lvim.plugins, {
+  "akinsho/toggleterm.nvim",
+  version = "*",
+  config = function()
+    require("toggleterm").setup({
+      size = 20,
+        open_mapping = [[<c-\>]],
+        hide_numbers = true,
+        shade_terminals = true,
+        shading_factor = 2,
+        start_in_insert = true,
+        insert_mappings = true,
+        persist_size = true,
+        direction = "horizontal",
+        close_on_exit = true,
+        shell = vim.o.shell,
+        -- 关键配置：在当前目录打开
+        dir = vim.fn.getcwd(),  -- 优先使用 git 根目录，如果不是 git 仓库则使用当前文件目录
+        float_opts = {
+          border = "curved",
+          winblend = 0,
+        },
+    })
+  end,
+})
+
+table.insert(lvim.plugins, {
+  "MeanderingProgrammer/render-markdown.nvim",
+  ft = { "markdown" },
+  dependencies = { "nvim-treesitter/nvim-treesitter" },
+  opts = {
+    heading = {
+      enabled = true,
+      sign = true,
+      icons = { "󰲡 ", "󰲣 ", "󰲥 ", "󰲧 ", "󰲩 ", "󰲫 " },
+      width = "full",
+    },
+    code = {
+      enabled = true,
+      sign = true,
+      style = "full",
+      width = "full",
+      right_pad = 1,
+      language_pad = 2,
+      disable_background = true,
+    },
+    checkbox = {
+      enabled = true,
+      unchecked = { icon = "󰄱 ", highlight = "RenderMarkdownUnchecked" },
+      checked = { icon = "󰱒 ", highlight = "RenderMarkdownChecked" },
+      custom = {
+        todo = { raw = "[-]", rendered = "󰥔 ", highlight = "RenderMarkdownTodo" },
+        important = { raw = "[!]", rendered = "󰀦 ", highlight = "RenderMarkdownImportant" },
+      },
+    },
+    link = {
+      enabled = true,
+      image = true,
+      url = true,
+    },
+    quote = {
+      enabled = true,
+      icon = "▎",
+    },
+    dash = {
+      enabled = true,
+      width = 79,
+      icon = "─",
+    },
+    pipe_table = {
+      enabled = true,
+      style = "full",
+      alignment = "center",
+    },
+  },
+})
+
+table.insert(lvim.plugins, {
+  "ellisonleao/glow.nvim",
+  config = function()
+    require("glow").setup({
+      glow_path = vim.fn.exepath("glow"),
+      width = 120,
+      border = "single",
+      style = "dark",
+    })
+  end,
+  cmd = { "Glow" },
+})
+
+table.insert(lvim.plugins, {
+  "epwalsh/obsidian.nvim",
+  version = "*",
+  ft = "markdown",
+  dependencies = {
+    "nvim-lua/plenary.nvim",
+  },
+  opts = {
+    dir = "~/doc/icloud-obs-git/", -- 请修改为你的 Obsidian vault 路径
+    completion = {
+      nvim_cmp = true,
+    },
+    mappings = {
+      ["gf"] = {
+        action = function()
+          return require("obsidian").util.gf_passthrough()
+        end,
+        opts = { noremap = false, expr = true, buffer = true },
+      },
+      ["<leader>ch"] = {
+        action = function()
+          return require("obsidian").util.toggle_checkbox()
+        end,
+        opts = { buffer = true },
+      },
+    },
+  },
+})
+
+-- 添加到 config.lua
+lvim.keys.normal_mode["<leader>tf"] = "<cmd>ToggleTerm direction=float<CR>"
+lvim.keys.normal_mode["<leader>th"] = "<cmd>ToggleTerm direction=horizontal<CR>"
+lvim.keys.normal_mode["<leader>tv"] = "<cmd>ToggleTerm direction=vertical<CR>"
+lvim.keys.normal_mode["<leader>rm"] = "<cmd>RenderMarkdown toggle<CR>"
+lvim.keys.normal_mode["<leader>rp"] = "<cmd>RenderMarkdown preview<CR>"
+lvim.keys.normal_mode["<leader>mg"] = "<cmd>Glow<CR>"
+lvim.keys.normal_mode["<leader>mt"] = "<cmd>SymbolsOutline<CR>"
+
+
+-- 切换不同编号的终端
+lvim.keys.normal_mode["<leader>t1"] = "<cmd>1ToggleTerm<CR>"
+lvim.keys.normal_mode["<leader>t2"] = "<cmd>2ToggleTerm<CR>"
+lvim.keys.normal_mode["<leader>t3"] = "<cmd>3ToggleTerm<CR>"
+
+-- 终端选择器
+lvim.keys.normal_mode["<leader>ts"] = "<cmd>TermSelect<CR>"
+
+
+require("lvim.lsp.manager").setup("ruff")
+lvim.lsp.installer.setup.ensure_installed = {
+  "pyright",
+}
+
+
+-- Copilot plugins are defined below:
+-- Below config is required to prevent copilot overriding Tab with a suggestion
+-- when you're just trying to indent!
+local has_words_before = function()
+    if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then return false end
+    local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+    return col ~= 0 and vim.api.nvim_buf_get_text(0, line-1, 0, line-1, col, {})[1]:match("^%s*$") == nil
+end
+local on_tab = vim.schedule_wrap(function(fallback)
+    local cmp = require("cmp")
+    if cmp.visible() and has_words_before() then
+        cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+    else
+        fallback()
+    end
+end)
+lvim.builtin.cmp.mapping["<Tab>"] = on_tab
