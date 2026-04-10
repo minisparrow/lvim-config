@@ -25,6 +25,18 @@ end
 
 vim.g.python3_host_prog = ensure_lvim_pyenv()
 vim.deprecate = function() end
+
+-- Global guard to avoid treesitter 'range' nil errors
+if vim.treesitter and vim.treesitter.get_node_text then
+  local ts = vim.treesitter
+  local orig_get_node_text = ts.get_node_text
+  ts.get_node_text = function(node, bufnr, opts)
+    if not node or type(node.range) ~= "function" then
+      return ""
+    end
+    return orig_get_node_text(node, bufnr, opts)
+  end
+end
 --
 -- copilot
 --
@@ -280,7 +292,7 @@ local plugins = {
     -- Treesitter configuration
     require 'nvim-treesitter.configs'.setup {
       highlight = {
-        enable = true, -- false will disable the whole extension
+        enable = true,
       },
       incremental_selection = {
         enable = true,
@@ -746,55 +758,7 @@ table.insert(lvim.plugins, {
   "MeanderingProgrammer/render-markdown.nvim",
   ft = { "markdown" },
   dependencies = { "nvim-treesitter/nvim-treesitter" },
-  opts = {
-    heading = {
-      enabled = true,
-      sign = true,
-      icons = { "󰲡 ", "󰲣 ", "󰲥 ", "󰲧 ", "󰲩 ", "󰲫 " },
-      width = "full",
-    },
-    code = {
-      enabled = true,
-      sign = true,
-      style = "full",
-      width = "full",
-      right_pad = 1,
-      language_pad = 2,
-      disable_background = true,
-    },
-    checkbox = {
-      enabled = true,
-      unchecked = { icon = "󰄱 ", highlight = "RenderMarkdownUnchecked" },
-      checked = { icon = "󰱒 ", highlight = "RenderMarkdownChecked" },
-      custom = {
-        todo = { raw = "[-]", rendered = "󰥔 ", highlight = "RenderMarkdownTodo" },
-        important = { raw = "[!]", rendered = "󰀦 ", highlight = "RenderMarkdownImportant" },
-      },
-    },
-    link = {
-      enabled = true,
-      image = true,
-      url = true,
-    },
-    quote = {
-      enabled = true,
-      icon = "▎",
-    },
-    dash = {
-      enabled = true,
-      width = 79,
-      icon = "─",
-    },
-    pipe_table = {
-      enabled = true,
-      preset = 'round',
-      style = 'full',
-      cell = 'padded',
-      alignment_indicator = '━',
-      head = 'overlay',
-      row = 'overlay',
-    },
-  },
+  opts = {},
 })
 
 table.insert(lvim.plugins, {
