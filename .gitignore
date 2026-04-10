@@ -5,3 +5,5 @@ local-plugins/
 lua-old/
 lvim-config2
 minimal_init.lua
+extension.vsixmanifest
+lazy-lock.json
