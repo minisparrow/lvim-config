@@ -3,6 +3,28 @@
 -- Forum: https://www.reddit.com/r/lunarvim/
 -- Discord: https://discord.com/invite/Xb9B4Ny
 --
+-- Suppress deprecated API warnings (fix E36: Not enough room)
+--
+local function ensure_lvim_pyenv()
+  local home = vim.fn.expand("~")
+  local venv = home .. "/.local/share/lunarvim/pyenv"
+  local python = venv .. "/bin/python"
+  if vim.fn.executable(python) == 0 then
+    if vim.fn.executable("python3") == 0 then
+      vim.notify("python3 not found for LunarVim pyenv", vim.log.levels.WARN)
+      return "python3"
+    end
+    vim.notify("Creating LunarVim Python venv...", vim.log.levels.INFO)
+    vim.fn.system({ "python3", "-m", "venv", venv })
+    if vim.fn.executable(python) == 1 then
+      vim.fn.system({ python, "-m", "pip", "install", "--upgrade", "pip", "pynvim" })
+    end
+  end
+  return python
+end
+
+vim.g.python3_host_prog = ensure_lvim_pyenv()
+vim.deprecate = function() end
 --
 -- copilot
 --
@@ -10,7 +32,6 @@
 ---
 ---
 local plugins = {
-  {
     -- copilot
     --
     -- {
@@ -21,7 +42,7 @@ local plugins = {
     --         require("copilot").setup({})
     --     end,
     -- },
-    -- 
+    --
     -- {
     --     "zbirenbaum/copilot-cmp",
     --     config = function()
@@ -46,7 +67,55 @@ local plugins = {
     --   end,
     -- },
 
-    "ojroques/nvim-osc52", -- 更方便的做远程ssh复制粘贴到本地
+    {
+      'dmtrKovalenko/fff.nvim',
+      -- requires Neovim >= 0.10
+      enabled = vim.fn.has("nvim-0.10") == 1,
+      build = function()
+        -- this will download prebuild binary or try to use existing rustup toolchain to build from source
+        -- (if you are using lazy you can use gb for rebuilding a plugin if needed)
+        require("fff.download").download_or_build_binary()
+      end,
+      -- if you are using nixos
+      -- build = "nix run .#release",
+      opts = { -- (optional)
+        debug = {
+          enabled = true,     -- we expect your collaboration at least during the beta
+          show_scores = true, -- to help us optimize the scoring system, feel free to share your scores!
+        },
+      },
+      -- No need to lazy-load with lazy.nvim.
+      -- This plugin initializes itself lazily.
+      lazy = false,
+      keys = {
+        {
+          "ff", -- try it if you didn't it is a banger keybinding for a picker
+          function() require('fff').find_files() end,
+          desc = 'FFFind files',
+        },
+        {
+          "fg",
+          function() require('fff').live_grep() end,
+          desc = 'LiFFFe grep',
+        },
+        {
+          "fz",
+          function() require('fff').live_grep({
+            grep = {
+              modes = { 'fuzzy', 'plain' }
+            }
+          }) end,
+          desc = 'Live fffuzy grep',
+        },
+        {
+          "fc",
+          function() require('fff').live_grep({ query = vim.fn.expand("<cword>") }) end,
+          desc = 'Search current word',
+        },
+      }
+    },
+ 
+     "ojroques/nvim-osc52", -- 更方便的做远程ssh复制粘贴到本地
 
     -- latex, ultisnips
     "dylanaraps/wal",
@@ -113,9 +182,28 @@ local plugins = {
     {
       "toppair/peek.nvim",
       event = { "VeryLazy" },
-      build = "deno task --quiet build:fast",
-      -- deno install
-      -- curl -fsSL https://deno.land/install.sh | sh
+      build = function()
+        if vim.fn.executable("deno") == 0 then
+          vim.notify("Installing deno for peek.nvim...", vim.log.levels.INFO)
+          vim.fn.system({ "bash", "-lc", "curl -fsSL https://deno.land/install.sh | sh" })
+          local home = vim.fn.expand("~")
+          local line = 'export PATH="$HOME/.deno/bin:$PATH"'
+          for _, rc in ipairs({ ".bashrc", ".zshrc" }) do
+            local rcpath = home .. "/" .. rc
+            if vim.fn.filereadable(rcpath) == 1 then
+              local lines = vim.fn.readfile(rcpath)
+              local content = table.concat(lines, "\n")
+              if not content:find("%.deno/bin") then
+                table.insert(lines, line)
+                vim.fn.writefile(lines, rcpath)
+              end
+            else
+              vim.fn.writefile({ line }, rcpath)
+            end
+          end
+        end
+        vim.fn.system({ "deno", "task", "--quiet", "build:fast" })
+      end,
       config = function()
         require('peek').setup({
           auto_load = true,          -- 打开 Markdown 文件时自动加载预览
@@ -140,8 +228,8 @@ local plugins = {
     'kshenoy/vim-signature',
     'inkarkat/vim-mark',
     'inkarkat/vim-ingo-library',
-    'junegunn/fzf',
-    'junegunn/fzf.vim',
+    -- 'junegunn/fzf',
+    -- 'junegunn/fzf.vim',
     'gyim/vim-boxdraw',
     'neovim/nvim-lspconfig',
     'simrat39/symbols-outline.nvim',
@@ -208,7 +296,7 @@ local plugins = {
     -- jupyter notebook
     -- 'luk400/vim-jukit',
     -- "GCBallesteros/jupytext.nvim"
-  },
+
   --   {
   --     "ggandor/lightspeed.nvim",
   --     event = "BufRead",
@@ -223,9 +311,9 @@ local plugins = {
 }
 
 -- 启用虚拟文本
-require("nvim-dap-virtual-text").setup {
-  commented = true, -- 在虚拟文本前加上注释风格，方便区分
-}
+-- require("nvim-dap-virtual-text").setup {
+--  commented = true, -- 在虚拟文本前加上注释风格，方便区分
+-- }
 
 local plugin_filetree = require('user.file-tree')
 vim.list_extend(plugins, plugin_filetree.plugins)
@@ -242,6 +330,11 @@ lvim.builtin.gitsigns.active = true
 lvim.plugins = plugins
 
 
+-- Disable breadcrumbs/winbar to fix E36: Not enough room
+lvim.builtin.breadcrumbs.active = false
+-- Disable illuminate to fix treesitter locals.lua incompatibility
+lvim.builtin.illuminate.active = false
+
 -- vim options
 vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
@@ -253,7 +346,6 @@ lvim.format_on_save = {
   timeout = 1000,
 }
 
-vim.g.python3_host_prog = "python3"
 
 -- 设置等宽字体以确保表格对齐
 vim.opt.guifont = "Monaco:h12"
@@ -307,6 +399,25 @@ vim.opt.relativenumber = false
 vim.opt.clipboard = "unnamedplus"
 vim.opt.number = true
 
+
+local function osc52_copy(lines, _)
+  require("osc52").copy(table.concat(lines, "\n"))
+end
+
+vim.g.clipboard = {
+  name = "osc52",
+  copy = {
+    ["+"] = osc52_copy,
+    ["*"] = osc52_copy,
+  },
+  paste = {
+    ["+"] = function() return { vim.fn.getreg("+"), vim.fn.getregtype("+") } end,
+    ["*"] = function() return { vim.fn.getreg("*"), vim.fn.getregtype("*") } end,
+  },
+}
+
+--[[
+--
 if vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1 then
   vim.g.clipboard = {
     name = "pbcopy",
@@ -334,6 +445,7 @@ elseif vim.fn.executable("xclip") == 1 then
     cache_enabled = true,
   }
 end
+--]]
 
 -- Markdown slide presentation
 lvim.keys.normal_mode["<leader>ms"] = "<cmd>Presenting<CR>"
@@ -619,7 +731,7 @@ table.insert(lvim.plugins, {
         persist_size = true,
         direction = "horizontal",
         close_on_exit = true,
-        shell = vim.o.shell,
+        shell = "zsh",
         -- 关键配置：在当前目录打开
         dir = vim.fn.getcwd(),  -- 优先使用 git 根目录，如果不是 git 仓库则使用当前文件目录
         float_opts = {
@@ -706,7 +818,7 @@ table.insert(lvim.plugins, {
     "nvim-lua/plenary.nvim",
   },
   opts = {
-    dir = "~/doc/icloud-obs-git/", -- 请修改为你的 Obsidian vault 路径
+    dir = "~/projs/icloud-obs/", -- 请修改为你的 Obsidian vault 路径
     completion = {
       nvim_cmp = true,
     },
@@ -788,3 +900,11 @@ local on_tab = vim.schedule_wrap(function(fallback)
     end
 end)
 lvim.builtin.cmp.mapping["<Tab>"] = on_tab
+
+-- Disable cmp in fff picker to avoid E36: Not enough room
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "fff",
+  callback = function()
+    require("cmp").setup.buffer({ enabled = false })
+  end,
+})
