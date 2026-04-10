@@ -13,9 +13,8 @@ fi
 declare -A SESSION_DIRS
 
 # Session -> directory mapping
-SESSION_DIRS["lv"]="/Users/jun/.config/lvim/lvim-config2/"
-SESSION_DIRS["projs"]="/Users/jun/projs/"
-SESSION_DIRS["obs"]="/Users/jun/doc/icloud-obs-git"
+SESSION_DIRS["lv"]="~/.config/lvim"
+SESSION_DIRS["obs"]="~/projs/icloud-obs"
 SESSIONS=("${!SESSION_DIRS[@]}")
 WINDOWS=("claude" "yaz" "git" "diff" "vim" "others")
 
