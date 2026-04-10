@@ -1,0 +1,7 @@
+.secrets
+codelldb-*
+extension/
+local-plugins/
+lua-old/
+lvim-config2
+minimal_init.lua
