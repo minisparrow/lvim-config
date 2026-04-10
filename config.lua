@@ -93,6 +93,15 @@ local plugins = {
         vim.g.vmt_dont_insert_fence = 1   -- 不插入围栏
       end,
     },
+    {
+      "dhruvasagar/vim-table-mode",
+      ft = { "markdown" },
+      config = function()
+        vim.g.table_mode_corner = '|'
+        vim.g.table_mode_corner_corner = '|'
+        vim.g.table_mode_header_fillchar = '-'
+      end,
+    },
     -- {
 
     --   "ajorgensen/vim-markdown-toc",
@@ -112,7 +121,7 @@ local plugins = {
           auto_load = true,          -- 打开 Markdown 文件时自动加载预览
           close_on_bdelete = true,   -- 关闭缓冲区时自动关闭预览
           app = 'browser',           -- 使用系统默认浏览器
-          theme = 'light',           -- 主题设置：'light' 或 'dark'
+          theme = 'dark',           -- 主题设置：'light' 或 'dark'
           filetype = { 'markdown' }, -- 启用预览的文件类型
         })
 
@@ -166,6 +175,13 @@ local plugins = {
           markdown = "^---$",
         },
         keep_separator = false,
+        keymaps = {
+          ["t"] = function() _G.Presenting.toggle_toc() end,
+          ["+"] = function() _G.Presenting.toc_wider(5) end,
+          ["-"] = function() _G.Presenting.toc_narrower(5) end,
+          [">"] = function() _G.Presenting.slide_wider(10) end,
+          ["<"] = function() _G.Presenting.slide_narrower(10) end,
+        },
       },
       cmd = { "Presenting" },
     },
@@ -238,13 +254,28 @@ lvim.format_on_save = {
 }
 
 vim.g.python3_host_prog = "python3"
+
+-- 设置等宽字体以确保表格对齐
+vim.opt.guifont = "Monaco:h12"
+vim.opt.encoding = "utf-8"
+vim.opt.ambiwidth = "single"
+vim.opt.listchars = { tab = '▸ ', trail = '·', extends = '❯', precedes = '❮', nbsp = '␣' }
+vim.opt.fillchars = { vert = '│', fold = '·', diff = '·' }
+
+-- 确保 CJK 字符宽度正确
+vim.opt.termguicolors = true
+
+-- 禁用 conceal 以确保表格正常显示
+vim.opt.conceallevel = 0
+vim.opt.concealcursor = ""
+
 -- keymappings <https://www.lunarvim.org/docs/configuration/keybindings>
 lvim.leader = "space"
 -- add your own keymapping
 lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
 -- -- Change theme settings
 -- lvim.colorscheme = "habamax"
-lvim.colorscheme = "desert"
+lvim.colorscheme = "lunarperche"
 
 lvim.builtin.alpha.active = true
 lvim.builtin.alpha.mode = "dashboard"
@@ -644,8 +675,12 @@ table.insert(lvim.plugins, {
     },
     pipe_table = {
       enabled = true,
-      style = "full",
-      alignment = "center",
+      preset = 'round',
+      style = 'full',
+      cell = 'padded',
+      alignment_indicator = '━',
+      head = 'overlay',
+      row = 'overlay',
     },
   },
 })
@@ -700,6 +735,25 @@ lvim.keys.normal_mode["<leader>rm"] = "<cmd>RenderMarkdown toggle<CR>"
 lvim.keys.normal_mode["<leader>rp"] = "<cmd>RenderMarkdown preview<CR>"
 lvim.keys.normal_mode["<leader>mg"] = "<cmd>Glow<CR>"
 lvim.keys.normal_mode["<leader>mt"] = "<cmd>SymbolsOutline<CR>"
+lvim.keys.normal_mode["<leader>ma"] = ":Tabularize /|<CR>"
+lvim.keys.visual_mode["<leader>ma"] = ":Tabularize /|<CR>"
+lvim.keys.normal_mode["<leader>tm"] = "<cmd>TableModeToggle<CR>"
+lvim.keys.normal_mode["<leader>tr"] = "<cmd>TableModeRealign<CR>"
+
+-- Markdown 幻灯片工具快捷键（全屏版）
+lvim.keys.normal_mode["<leader>ml"] = function()
+  local file = vim.fn.expand("%:p")
+  -- 全屏打开 slides
+  vim.cmd("terminal slides '" .. file .. "'")
+  vim.cmd("startinsert")
+end
+
+lvim.keys.normal_mode["<leader>mp"] = function()
+  local file = vim.fn.expand("%:p")
+  -- 全屏打开 mdp
+  vim.cmd("terminal mdp '" .. file .. "'")
+  vim.cmd("startinsert")
+end
 
 
 -- 切换不同编号的终端

@@ -1,5 +1,13 @@
 local dap = require("dap")
-local cmd = os.getenv('HOME') .. '/.config/lvim/extension/adapter/codelldb'
+-- local cmd = os.getenv('HOME') .. '/.config/lvim/extension/adapter/codelldb'
+local cmd = os.getenv('HOME') .. '/.config/lvim/codelldb-1.11.5/target/release/codelldb'
+-- GDB adapter configuration
+dap.adapters.gdb = {
+  type = "executable",
+  command = "gdb",
+  args = { "-i", "dap" }
+}
+
 dap.adapters.codelldb = function(on_adapter)
   -- This asks the system for a free port
   local tcp = vim.loop.new_tcp()
@@ -13,7 +21,7 @@ dap.adapters.codelldb = function(on_adapter)
   local stderr = vim.loop.new_pipe(false)
   local opts = {
     stdio = { nil, stdout, stderr },
-    args = { '--port', tostring(port) },
+    args = { '--port', tostring(port), '--settings', '{"sourceLanguages":["cpp"],"expressions":"simple","showDisassembly":"never"}' },
   }
   local handle
   local pid_or_err
@@ -72,21 +80,29 @@ dap.configurations.cpp = {
     program = function()
       return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
     end,
-    pid = function()
-      local handle = io.popen('pgrep hw$')
-      local result = handle:read()
-      handle:close()
-      return result
-    end,
     cwd = '${workspaceFolder}',
-    stopOnEntry = true,
-    terminal = 'integrated',
+    stopOnEntry = false,
+    runInTerminal = true,
+    expressions = "simple",
+    sourceLanguages = { "cpp" },
+    setupCommands = {
+      {
+        text = "-enable-pretty-printing",
+        description = "Enable pretty printing",
+        ignoreFailures = false
+      },
+      {
+        text = "settings set target.expr-prefix true",
+        description = "Enable expression prefix",
+        ignoreFailures = true
+      },
+    },
   },
   {
     name = "Launch with Python",
     type = "codelldb",
     request = "launch",
-    program = "python3",
+    program = "~/projs/triton-related/triton/venv-triton/bin/python3",
     args = function()
       local script = vim.fn.input('Path to Python script: ', vim.fn.getcwd() .. '/', 'file')
       return { script }
@@ -96,7 +112,7 @@ dap.configurations.cpp = {
     runInTerminal = true,
   },
   {
-    name = "Launch file with args",
+    name = "Launch file with args(codelldb)",
     type = "codelldb",
     request = "launch",
     program = function()
@@ -104,12 +120,42 @@ dap.configurations.cpp = {
     end,
     args = function()
       local input = vim.fn.input('Program arguments (space separated): ')
-      return vim.split(input, " ")
+      return vim.split(input, "%s+", { trimempty = true })
     end,
     cwd = '${workspaceFolder}',
-    stopOnEntry = true,
-    terminal = 'integrated',
-  }
+    stopOnEntry = false,        -- 默认不在入口点停止
+    runInTerminal = true,       -- 让被调试程序在终端里跑
+  },
+  {
+    name = "Launch file with args(gdb)",
+    type = "gdb",
+    request = "launch",
+    program = function()
+      return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+    end,
+    args = function()
+      local input = vim.fn.input('Program arguments (space separated): ')
+      return vim.split(input, "%s+", { trimempty = true })
+    end,
+    cwd = '${workspaceFolder}',
+    stopOnEntry = false,        -- 默认不在入口点停止
+    runInTerminal = true,       -- 让被调试程序在终端里跑
+    stopAtBeginningOfMainSubprogram = false,
+  },
+  {
+    name = "Debug with GDB",
+    type = "gdb",
+    request = "launch",
+    program = function()
+      return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+    end,
+    args = function()
+      local input = vim.fn.input('Program arguments (space separated): ')
+      return vim.split(input, "%s+", { trimempty = true })
+    end,
+    cwd = '${workspaceFolder}',
+    stopAtBeginningOfMainSubprogram = false,
+  },
 
 }
 

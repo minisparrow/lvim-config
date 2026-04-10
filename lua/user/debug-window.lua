@@ -21,6 +21,7 @@ lvim.keys.normal_mode["<leader>dw2"] = ":lua require('user.debug-window').toggle
 lvim.keys.normal_mode["<leader>dw3"] = ":lua require('user.debug-window').toggle_element(3)<CR>"
 lvim.keys.normal_mode["<leader>dw4"] = ":lua require('user.debug-window').toggle_element(4)<CR>"
 lvim.keys.normal_mode["<leader>dw5"] = ":lua require('user.debug-window').toggle_element(5)<CR>"
+lvim.keys.normal_mode["<leader>dw6"] = ":lua require('user.debug-window').toggle_element(6)<CR>"
 
 function open_single_float_element(element)
   -- Close all dap-ui elements
