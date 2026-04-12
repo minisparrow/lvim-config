@@ -1,3 +1,13 @@
+-- 自动从远程拉取更新（每次打开时检测）
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function()
+    local git_dir = vim.fn.finddir(".git", vim.fn.getcwd() .. ";")
+    if git_dir ~= "" then
+      vim.fn.system("git pull")
+    end
+  end,
+})
+
 -- Read the docs: https://www.lunarvim.org/docs/configuration
 -- Video Tutorials: https://www.youtube.com/watch?v=sFA9kX-Ud_c&list=PLhoH5vyxr6QqGu0i7tt_XoVK9v-KvZ3m6
 -- Forum: https://www.reddit.com/r/lunarvim/
