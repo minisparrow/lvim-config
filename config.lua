@@ -409,23 +409,18 @@ vim.opt.relativenumber = false
 
 -- lifunc clipboard
 vim.opt.clipboard = "unnamedplus"
-vim.opt.number = true
 
-
+-- osc52 配置：只覆盖 copy，保留 paste 让 yy 正常工作
 local function osc52_copy(lines, _)
   require("osc52").copy(table.concat(lines, "\n"))
 end
-
 vim.g.clipboard = {
   name = "osc52",
   copy = {
     ["+"] = osc52_copy,
     ["*"] = osc52_copy,
   },
-  paste = {
-    ["+"] = function() return { vim.fn.getreg("+"), vim.fn.getregtype("+") } end,
-    ["*"] = function() return { vim.fn.getreg("*"), vim.fn.getregtype("*") } end,
-  },
+  -- paste 保持默认，不覆盖
 }
 
 --[[
@@ -678,9 +673,11 @@ dapui.setup({
   },
 })
 
-vim.o.foldmethod = 'indent'
-vim.o.foldlevel = 99    -- 默认展开所有折叠
-vim.o.foldenable = true -- 启用代码折叠
+-- vim.o.foldmethod = 'indent'
+-- vim.o.foldlevel = 99    -- 默认展开所有折叠
+-- vim.o.foldenable = true -- 启用代码折叠
+vim.o.foldmethod = 'manual'
+vim.o.foldenable = false
 
 require("user.searchword")
 require("user.jump")
