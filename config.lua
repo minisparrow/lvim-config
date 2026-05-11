@@ -753,7 +753,7 @@ table.insert(lvim.plugins, {
     "nvim-lua/plenary.nvim",
   },
   opts = {
-    dir = "~/projs/icloud-obs/", -- 请修改为你的 Obsidian vault 路径
+    -- dir = "~/projs/icloud-obs/", -- 请修改为你的 Obsidian vault 路径
     completion = {
       nvim_cmp = true,
     },
