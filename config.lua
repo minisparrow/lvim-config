@@ -426,53 +426,8 @@ vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
 vim.opt.relativenumber = false
 
--- lifunc clipboard
-vim.opt.clipboard = "unnamedplus"
 
--- osc52 配置：只覆盖 copy，保留 paste 让 yy 正常工作
-local function osc52_copy(lines, _)
-  require("osc52").copy(table.concat(lines, "\n"))
-end
-vim.g.clipboard = {
-  name = "osc52",
-  copy = {
-    ["+"] = osc52_copy,
-    ["*"] = osc52_copy,
-  },
-  -- paste 保持默认，不覆盖
-}
-
--- --[[
---
-if vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1 then
-  vim.g.clipboard = {
-    name = "pbcopy",
-    copy = {
-      ["+"] = "pbcopy",
-      ["*"] = "pbcopy",
-    },
-    paste = {
-      ["+"] = "pbpaste",
-      ["*"] = "pbpaste",
-    },
-    cache_enabled = true,
-  }
-elseif vim.fn.executable("xclip") == 1 then
-  vim.g.clipboard = {
-    name = "xclip",
-    copy = {
-      ["+"] = "xclip -selection clipboard",
-      ["*"] = "xclip -selection primary",
-    },
-    paste = {
-      ["+"] = "xclip -selection clipboard -o",
-      ["*"] = "xclip -selection primary -o",
-    },
-    cache_enabled = true,
-  }
-end
--- --]]
-
+require("user.clipboard")
 -- Markdown slide presentation
 lvim.keys.normal_mode["<leader>ms"] = "<cmd>Presenting<CR>"
 lvim.keys.normal_mode["<leader>mv"] = "<cmd>Vimdeck<CR>"
