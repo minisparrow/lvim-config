@@ -280,17 +280,26 @@ local plugins = {
         options = {
           width = 120,
           toc_width = 40,
+          toc_gap = 6,
+          toc_separator = "┃",
+          toc_separator_highlight = "FloatBorder",
+          toc_padding = 1,
+          toc_bullet = "•",
         },
         separator = {
           markdown = "^---$",
         },
         keep_separator = false,
         keymaps = {
+          ["l"] = nil,  -- 禁用默认的 l=last，避免与光标右移冲突
+          ["L"] = function() _G.Presenting.last() end,  -- 改用大写 L 跳到最后一页
           ["t"] = function() _G.Presenting.toggle_toc() end,
+          ["e"] = function() _G.Presenting.goto_source() end, -- 回到原文档编辑
+          ["r"] = function() _G.Presenting.refresh_from_source() end, -- 保存后刷新幻灯片
+          ["s"] = function() _G.Presenting.goto_slide_prompt() end, -- 跳转到指定页
           ["+"] = function() _G.Presenting.toc_wider(5) end,
           ["-"] = function() _G.Presenting.toc_narrower(5) end,
           [">"] = function() _G.Presenting.slide_wider(10) end,
-          ["<"] = function() _G.Presenting.slide_narrower(10) end,
         },
       },
       cmd = { "Presenting" },
@@ -433,7 +442,7 @@ vim.g.clipboard = {
   -- paste 保持默认，不覆盖
 }
 
---[[
+-- --[[
 --
 if vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1 then
   vim.g.clipboard = {
@@ -462,7 +471,7 @@ elseif vim.fn.executable("xclip") == 1 then
     cache_enabled = true,
   }
 end
---]]
+-- --]]
 
 -- Markdown slide presentation
 lvim.keys.normal_mode["<leader>ms"] = "<cmd>Presenting<CR>"
