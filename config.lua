@@ -888,3 +888,7 @@ vim.api.nvim_create_autocmd("FileType", {
     require("cmp").setup.buffer({ enabled = false })
   end,
 })
+lvim.keys.normal_mode["<leader>md"] = {
+  function() require("user.slide-split").split_slides() end,
+  desc = "Markdown 生成幻灯片分页"
+}
