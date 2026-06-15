@@ -298,21 +298,6 @@ local plugins = {
       "ducks/vimdeck.nvim",
       cmd = { "Vimdeck" },
     },
-    -- Treesitter configuration
-    require 'nvim-treesitter.configs'.setup {
-      highlight = {
-        enable = true,
-      },
-      incremental_selection = {
-        enable = true,
-        keymaps = {
-          init_selection = "gnn",
-          node_incremental = "grn",
-          scope_incremental = "grc",
-          node_decremental = "grm",
-        },
-      },
-    }
 
     -- jupyter notebook
     -- 'luk400/vim-jukit',
@@ -355,6 +340,7 @@ lvim.plugins = plugins
 lvim.builtin.breadcrumbs.active = false
 -- Disable illuminate to fix treesitter locals.lua incompatibility
 lvim.builtin.illuminate.active = false
+lvim.builtin.indentlines.active = false
 
 -- vim options
 vim.opt.shiftwidth = 2
@@ -508,20 +494,15 @@ cmp.setup {
   })
 }
 
--- Treesitter configuration
-require 'nvim-treesitter.configs'.setup {
-  highlight = {
-    enable = true, -- false will disable the whole extension
-  },
-  incremental_selection = {
-    enable = true,
-    keymaps = {
-      init_selection = "gnn",
-      node_incremental = "grn",
-      scope_incremental = "grc",
-      node_decremental = "grm",
-    },
-  },
+lvim.builtin.treesitter.highlight.enable = true
+lvim.builtin.treesitter.incremental_selection = {
+  enable = true,
+  keymaps = {
+         init_selection = "gnn",
+         node_incremental = "grn",
+         scope_incremental = "grc",
+         node_decremental = "grm",
+       },
 }
 
 lvim.builtin.treesitter.ensure_installed = {
