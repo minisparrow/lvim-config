@@ -1,13 +1,3 @@
--- 自动从远程拉取更新（每次打开时检测）
-vim.api.nvim_create_autocmd("VimEnter", {
-  callback = function()
-    local git_dir = vim.fn.finddir(".git", vim.fn.getcwd() .. ";")
-    if git_dir ~= "" then
-      vim.fn.system("git pull")
-    end
-  end,
-})
-
 -- Read the docs: https://www.lunarvim.org/docs/configuration
 -- Video Tutorials: https://www.youtube.com/watch?v=sFA9kX-Ud_c&list=PLhoH5vyxr6QqGu0i7tt_XoVK9v-KvZ3m6
 -- Forum: https://www.reddit.com/r/lunarvim/
@@ -392,14 +382,6 @@ vim.opt.termguicolors = true
 vim.opt.conceallevel = 0
 vim.opt.concealcursor = ""
 
--- keymappings <https://www.lunarvim.org/docs/configuration/keybindings>
-lvim.leader = "space"
--- add your own keymapping
-lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
--- -- Change theme settings
--- lvim.colorscheme = "habamax"
-lvim.colorscheme = "lunarperche"
-
 lvim.builtin.alpha.active = true
 lvim.builtin.alpha.mode = "dashboard"
 lvim.builtin.terminal.active = true
@@ -428,10 +410,6 @@ vim.opt.relativenumber = false
 
 
 require("user.clipboard")
--- Markdown slide presentation
-lvim.keys.normal_mode["<leader>ms"] = "<cmd>Presenting<CR>"
-lvim.keys.normal_mode["<leader>mv"] = "<cmd>Vimdeck<CR>"
-
 vim.opt.number = true
 require("symbols-outline").setup()
 local opts = {
@@ -545,13 +523,6 @@ require 'nvim-treesitter.configs'.setup {
     },
   },
 }
-
--- add your own keymapping
-lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
-lvim.keys.normal_mode["<C-p>"] = ":bprevious<cr>"
-lvim.keys.normal_mode["<C-n>"] = ":bnext<cr>"
-lvim.keys.normal_mode["<C-l>"] = ":echo expand('%:p')<cr>"
-lvim.keys.normal_mode["<C-t>"] = ":SymbolsOutline<cr>"
 
 lvim.builtin.treesitter.ensure_installed = {
   "python",
@@ -673,16 +644,8 @@ neoscroll = require('neoscroll')
 
 vim.api.nvim_set_keymap('n', '<leader>gvc', ':GraphvizCompile<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>gv', ':Graphviz<CR>', { noremap = true, silent = true })
--- autoscroll
-lvim.keys.normal_mode["<leader>rol"] = function() neoscroll.scroll(20, true, 200) end
-
 -- 引入自动滚动模块
 local autoscroll = require("user.autoscroll")
-
--- 启动自动滚动
-lvim.keys.normal_mode["<C-f>"] = function() autoscroll.start(500) end -- 每 200 毫秒滚动 1 行
--- 停止自动滚动
-lvim.keys.normal_mode["<C-b>"] = function() autoscroll.stop() end
 
 
 -- evaluate current value when debug  2025.7.7
@@ -692,7 +655,6 @@ function add_to_dap_watch()
   dapui.eval()
   dapui.elements.watches.add(word)
 end
-lvim.keys.normal_mode["<leader>dwa"] = ":lua add_to_dap_watch()<CR>"
 
 vim.keymap.set('v', '<leader>y', function()
   require('osc52').copy_visual()
@@ -774,6 +736,59 @@ table.insert(lvim.plugins, {
   },
 })
 
+
+require("lvim.lsp.manager").setup("ruff")
+lvim.lsp.installer.setup.ensure_installed = {
+  "pyright",
+}
+
+
+-- Copilot plugins are defined below:
+-- Below config is required to prevent copilot overriding Tab with a suggestion
+-- when you're just trying to indent!
+local has_words_before = function()
+    if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then return false end
+    local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+    return col ~= 0 and vim.api.nvim_buf_get_text(0, line-1, 0, line-1, col, {})[1]:match("^%s*$") == nil
+end
+local on_tab = vim.schedule_wrap(function(fallback)
+    local cmp = require("cmp")
+    if cmp.visible() and has_words_before() then
+        cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
+    else
+        fallback()
+    end
+end)
+lvim.builtin.cmp.mapping["<Tab>"] = on_tab
+
+-- Disable cmp in fff picker to avoid E36: Not enough room
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "fff",
+  callback = function()
+    require("cmp").setup.buffer({ enabled = false })
+  end,
+})
+-- -- Change theme settings
+-- lvim.colorscheme = "habamax"
+lvim.colorscheme = "lunarperche"
+
+-- keymappings <https://www.lunarvim.org/docs/configuration/keybindings>
+lvim.leader = "space"
+-- Markdown slide presentation
+lvim.keys.normal_mode["<leader>ms"] = "<cmd>Presenting<CR>"
+lvim.keys.normal_mode["<leader>mv"] = "<cmd>Vimdeck<CR>"
+lvim.keys.normal_mode["<C-s>"] = ":w<cr>"
+lvim.keys.normal_mode["<C-p>"] = ":bprevious<cr>"
+lvim.keys.normal_mode["<C-n>"] = ":bnext<cr>"
+lvim.keys.normal_mode["<C-l>"] = ":echo expand('%:p')<cr>"
+lvim.keys.normal_mode["<C-t>"] = ":SymbolsOutline<cr>"
+-- autoscroll
+lvim.keys.normal_mode["<leader>rol"] = function() neoscroll.scroll(20, true, 200) end
+-- 启动自动滚动
+lvim.keys.normal_mode["<C-f>"] = function() autoscroll.start(500) end -- 每 200 毫秒滚动 1 行
+-- 停止自动滚动
+lvim.keys.normal_mode["<C-b>"] = function() autoscroll.stop() end
+lvim.keys.normal_mode["<leader>dwa"] = ":lua add_to_dap_watch()<CR>"
 -- 添加到 config.lua
 lvim.keys.normal_mode["<leader>tf"] = "<cmd>ToggleTerm direction=float<CR>"
 lvim.keys.normal_mode["<leader>th"] = "<cmd>ToggleTerm direction=horizontal<CR>"
@@ -810,40 +825,13 @@ lvim.keys.normal_mode["<leader>t3"] = "<cmd>3ToggleTerm<CR>"
 
 -- 终端选择器
 lvim.keys.normal_mode["<leader>ts"] = "<cmd>TermSelect<CR>"
-
-
-require("lvim.lsp.manager").setup("ruff")
-lvim.lsp.installer.setup.ensure_installed = {
-  "pyright",
-}
-
-
--- Copilot plugins are defined below:
--- Below config is required to prevent copilot overriding Tab with a suggestion
--- when you're just trying to indent!
-local has_words_before = function()
-    if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then return false end
-    local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-    return col ~= 0 and vim.api.nvim_buf_get_text(0, line-1, 0, line-1, col, {})[1]:match("^%s*$") == nil
-end
-local on_tab = vim.schedule_wrap(function(fallback)
-    local cmp = require("cmp")
-    if cmp.visible() and has_words_before() then
-        cmp.select_next_item({ behavior = cmp.SelectBehavior.Select })
-    else
-        fallback()
-    end
-end)
-lvim.builtin.cmp.mapping["<Tab>"] = on_tab
-
--- Disable cmp in fff picker to avoid E36: Not enough room
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "fff",
-  callback = function()
-    require("cmp").setup.buffer({ enabled = false })
-  end,
-})
 lvim.keys.normal_mode["<leader>md"] = {
   function() require("user.slide-split").split_slides() end,
   desc = "Markdown 生成幻灯片分页"
 }
+
+lvim.keys.normal_mode["<leader>v"] = "<C-v>"
+
+
+
+
