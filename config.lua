@@ -707,36 +707,6 @@ table.insert(lvim.plugins, {
   cmd = { "Glow" },
 })
 
-table.insert(lvim.plugins, {
-  "epwalsh/obsidian.nvim",
-  version = "*",
-  ft = "markdown",
-  dependencies = {
-    "nvim-lua/plenary.nvim",
-  },
-  opts = {
-    -- dir = "~/projs/icloud-obs/", -- 请修改为你的 Obsidian vault 路径
-    completion = {
-      nvim_cmp = true,
-    },
-    mappings = {
-      ["gf"] = {
-        action = function()
-          return require("obsidian").util.gf_passthrough()
-        end,
-        opts = { noremap = false, expr = true, buffer = true },
-      },
-      ["<leader>ch"] = {
-        action = function()
-          return require("obsidian").util.toggle_checkbox()
-        end,
-        opts = { buffer = true },
-      },
-    },
-  },
-})
-
-
 require("lvim.lsp.manager").setup("ruff")
 lvim.lsp.installer.setup.ensure_installed = {
   "pyright",
