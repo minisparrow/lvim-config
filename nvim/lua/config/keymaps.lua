@@ -78,9 +78,19 @@ map("v", "<leader>y", function()
 end, { desc = "Yank to clipboard" })
 
 -- load user modules
-require("user.clipboard")
-require("user.searchword")
-require("user.jump")
-require("user.countlines")
-require("user.depends-tree")
-require("user.inkscape_figure")
+local user_modules = {
+  "clipboard",
+  "searchword",
+  "jump",
+  "countlines",
+  "depends-tree",
+  "inkscape_figure",
+}
+
+for _, module in ipairs(user_modules) do
+  local ok, err = pcall(require, "user." .. module)
+  if not ok then
+    vim.notify("Failed to load user." .. module .. ": " .. err, vim.log.levels.WARN)
+  end
+end
+

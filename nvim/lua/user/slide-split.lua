@@ -65,7 +65,9 @@ function M.split_slides()
   local raw_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
   local lines = strip_old_separators(raw_lines)
   local win_height = vim.api.nvim_win_get_height(0)
-  local max_lines = win_height - 2
+  -- Increase content per slide: allow more lines between heading splits
+  -- Multiply by 1.5 to get significantly more content per heading
+  local max_lines = math.floor(win_height * 1.5)
 
   local start = 1
   if lines[1] and lines[1]:match("^%-%-%-$") then

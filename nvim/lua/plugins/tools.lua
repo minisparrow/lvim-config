@@ -126,9 +126,10 @@ return {
     },
   },
 
-  -- vim-mark: multi-color word highlighting
+  -- vim-mark: multi-color word highlighting (disabled due to keymap conflicts)
   {
     "inkarkat/vim-mark",
+    enabled = false,  -- Disable to avoid keymap conflicts
     dependencies = { "inkarkat/vim-ingo-library" },
   },
 

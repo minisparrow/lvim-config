@@ -1,10 +1,16 @@
-local pickers = require("telescope.pickers")
+local M = {}
+
+-- Only load if telescope is available
+local ok, pickers = pcall(require, "telescope.pickers")
+if not ok then
+  -- Telescope not available, return empty module
+  return M
+end
+
 local finders = require("telescope.finders")
 local conf = require("telescope.config").values
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
-
-local M = {}
 
 function list_figures()
   local i, t, popen = 0, {}, io.popen
