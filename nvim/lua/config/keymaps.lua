@@ -64,8 +64,26 @@ map("n", "<leader>mp", function()
 end, { desc = "MDP presentation" })
 
 map("n", "<leader>md", function()
+  -- First, remove all old separator lines
+  local buf = vim.api.nvim_get_current_buf()
+  local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+  local cleaned_lines = {}
+  
+  for _, line in ipairs(lines) do
+    -- Skip lines that are just "---"
+    if not line:match("^%-%-%-$") then
+      table.insert(cleaned_lines, line)
+    end
+  end
+  
+  -- Update buffer with cleaned lines
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, cleaned_lines)
+  
+  -- Now split the slides
   require("user.slide-split").split_slides()
-end, { desc = "Markdown split slides" })
+  
+  vim.notify("Cleaned old separators and split slides", vim.log.levels.INFO)
+end, { desc = "Markdown split slides (auto-clean)" })
 
 -- osc52 yank (remote clipboard)
 map("v", "<leader>y", function()
