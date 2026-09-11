@@ -1,4 +1,5 @@
 local M = {}
+local SLIDE_LINE_MULTIPLIER = 12
 
 local function insert_sep(result)
   table.insert(result, "")
@@ -69,9 +70,8 @@ function M.split_slides()
   local raw_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
   local lines = strip_old_separators(raw_lines)
   local win_height = vim.api.nvim_win_get_height(0)
-  -- Aggressive content per slide: multiply by 10 to drastically reduce page count
-  -- For 1599 lines, this should give roughly 15-20 pages
-  local max_lines = math.floor(win_height * 10)
+  -- Increase the per-slide line budget so short sections can share a page.
+  local max_lines = math.floor(win_height * SLIDE_LINE_MULTIPLIER)
 
   local start = 1
   if lines[1] and lines[1]:match("^%-%-%-$") then
@@ -177,23 +177,12 @@ function M.split_slides()
       table.insert(result, line)
 
     elseif heading_level(line) >= 1 then
-      local level = heading_level(line)
-      -- H1: start new slide
-      if level == 1 then
-        if count > 0 then
-          insert_sep(result)
-        end
-        table.insert(result, line)
-        count = 1
-      else
-        -- H2/H3: just add without forcing split
-        if count >= max_lines then
-          insert_sep(result)
-          count = 0
-        end
-        table.insert(result, line)
-        count = count + 1
+      -- H1 starts a new slide; later content is allowed to fill it.
+      if count > 0 then
+        insert_sep(result)
       end
+      table.insert(result, line)
+      count = 1
 
     else
       if count >= max_lines then
