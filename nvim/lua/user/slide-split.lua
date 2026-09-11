@@ -1,5 +1,5 @@
 local M = {}
-local SLIDE_LINE_MULTIPLIER = 12
+local SLIDE_LINE_MULTIPLIER = 20
 
 local function insert_sep(result)
   table.insert(result, "")
@@ -68,7 +68,7 @@ function M.split_slides()
   local raw_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
   local lines = strip_old_separators(raw_lines)
   local win_height = vim.api.nvim_win_get_height(0)
-  -- Increase the per-slide line budget so short sections can share a page.
+  -- Larger per-slide budget to reduce total page count.
   local max_lines = math.floor(win_height * SLIDE_LINE_MULTIPLIER)
 
   -- skip YAML frontmatter
@@ -93,7 +93,6 @@ function M.split_slides()
     local line = lines[i]
 
     if is_code_fence(line) then
-      -- collect entire code block
       local block = { line }
       i = i + 1
       while i <= #lines do
@@ -113,7 +112,6 @@ function M.split_slides()
       count = 0
 
     elseif is_table_line(line) then
-      -- collect entire table
       local block = { line }
       while i + 1 <= #lines and is_table_line(lines[i + 1]) do
         i = i + 1
@@ -139,7 +137,6 @@ function M.split_slides()
       end
 
     elseif heading_level(line) >= 1 then
-      -- H1 starts a new slide, but keep it open for following content.
       if count > 0 then
         insert_sep(result)
       end

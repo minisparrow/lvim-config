@@ -1,5 +1,5 @@
 local M = {}
-local SLIDE_LINE_MULTIPLIER = 12
+local SLIDE_LINE_MULTIPLIER = 20
 
 local function insert_sep(result)
   table.insert(result, "")
@@ -70,7 +70,7 @@ function M.split_slides()
   local raw_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
   local lines = strip_old_separators(raw_lines)
   local win_height = vim.api.nvim_win_get_height(0)
-  -- Increase the per-slide line budget so short sections can share a page.
+  -- Larger per-slide budget to reduce total page count.
   local max_lines = math.floor(win_height * SLIDE_LINE_MULTIPLIER)
 
   local start = 1
@@ -103,24 +103,14 @@ function M.split_slides()
         end
         i = i + 1
       end
-      
-      -- Only separate block if it's large (more than 10 lines)
-      if #block > 10 then
-        if count > 0 then
-          insert_sep(result)
-        end
-        for _, l in ipairs(block) do
-          table.insert(result, l)
-        end
+      if count > 0 then
         insert_sep(result)
-        count = 0
-      else
-        -- Small block: merge with other content
-        for _, l in ipairs(block) do
-          table.insert(result, l)
-          count = count + 1
-        end
       end
+      for _, l in ipairs(block) do
+        table.insert(result, l)
+      end
+      insert_sep(result)
+      count = 0
 
     elseif is_table_line(line) then
       local block = { line }
@@ -128,24 +118,14 @@ function M.split_slides()
         i = i + 1
         table.insert(block, lines[i])
       end
-      
-      -- Only separate table if it's large (more than 10 lines)
-      if #block > 10 then
-        if count > 0 then
-          insert_sep(result)
-        end
-        for _, l in ipairs(block) do
-          table.insert(result, l)
-        end
+      if count > 0 then
         insert_sep(result)
-        count = 0
-      else
-        -- Small table: merge with other content
-        for _, l in ipairs(block) do
-          table.insert(result, l)
-          count = count + 1
-        end
       end
+      for _, l in ipairs(block) do
+        table.insert(result, l)
+      end
+      insert_sep(result)
+      count = 0
 
     elseif is_quote_line(line) then
       local block = { line }
@@ -153,31 +133,19 @@ function M.split_slides()
         i = i + 1
         table.insert(block, lines[i])
       end
-      
-      -- Only separate quote if it's large (more than 10 lines)
-      if #block > 10 then
-        if count > 0 then
-          insert_sep(result)
-        end
-        for _, l in ipairs(block) do
-          table.insert(result, l)
-        end
+      if count > 0 then
         insert_sep(result)
-        count = 0
-      else
-        -- Small quote: merge with other content
-        for _, l in ipairs(block) do
-          table.insert(result, l)
-          count = count + 1
-        end
       end
+      for _, l in ipairs(block) do
+        table.insert(result, l)
+      end
+      insert_sep(result)
+      count = 0
 
     elseif line:match("^%s*$") then
-      -- Empty lines don't count towards slide content
       table.insert(result, line)
 
     elseif heading_level(line) >= 1 then
-      -- H1 starts a new slide; later content is allowed to fill it.
       if count > 0 then
         insert_sep(result)
       end
