@@ -146,11 +146,23 @@ function M.split_slides()
       table.insert(result, line)
 
     elseif heading_level(line) >= 1 then
-      if count > 0 then
-        insert_sep(result)
+      local level = heading_level(line)
+      if level == 1 then
+        -- H1 starts a new slide
+        if count > 0 then
+          insert_sep(result)
+        end
+        table.insert(result, line)
+        count = 1
+      else
+        -- H2/H3: just add without forcing a new slide
+        if count >= max_lines then
+          insert_sep(result)
+          count = 0
+        end
+        table.insert(result, line)
+        count = count + 1
       end
-      table.insert(result, line)
-      count = 1
 
     else
       if count >= max_lines then
