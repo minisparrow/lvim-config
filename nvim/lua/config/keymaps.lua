@@ -46,8 +46,12 @@ map("n", "<C-l>", ":echo expand('%:p')<cr>", { desc = "Show file path" })
 -- autoscroll (requires neoscroll)
 local autoscroll_ok, autoscroll = pcall(require, "user.autoscroll")
 if autoscroll_ok then
-  map("n", "<C-f>", function() autoscroll.start(500) end, { desc = "Start autoscroll" })
-  map("n", "<C-b>", function() autoscroll.stop() end, { desc = "Stop autoscroll" })
+  map("n", "<C-f>", function()
+    autoscroll.start(500)
+  end, { desc = "Start autoscroll" })
+  map("n", "<C-b>", function()
+    autoscroll.stop()
+  end, { desc = "Stop autoscroll" })
 end
 
 -- markdown slides
@@ -68,20 +72,20 @@ map("n", "<leader>md", function()
   local buf = vim.api.nvim_get_current_buf()
   local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
   local cleaned_lines = {}
-  
+
   for _, line in ipairs(lines) do
     -- Skip lines that are just "---"
     if not line:match("^%-%-%-$") then
       table.insert(cleaned_lines, line)
     end
   end
-  
+
   -- Update buffer with cleaned lines
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, cleaned_lines)
-  
+
   -- Now split the slides
   require("user.slide-split").split_slides()
-  
+
   vim.notify("Cleaned old separators and split slides", vim.log.levels.INFO)
 end, { desc = "Markdown split slides (auto-clean)" })
 
@@ -111,4 +115,3 @@ for _, module in ipairs(user_modules) do
     vim.notify("Failed to load user." .. module .. ": " .. err, vim.log.levels.WARN)
   end
 end
-
